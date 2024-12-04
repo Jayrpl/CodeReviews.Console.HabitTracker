@@ -6,27 +6,34 @@ namespace habit_tracker
 {
   class Program
   {
+    static string connectionString = @"Data Source=habit-Tracker.db";
 
     static void Main(string[] args)
     {
-      string connectionString = @"Data Source=habit-Tracker.db";
 
-      using (var connection = new SqliteConnection(connectionString))
-      {
-        connection.Open();
-        var tableCmd = connection.CreateCommand();
-
-        tableCmd.CommandText =
-          @"CREATE TABLE IF NOT EXISTS drinking_water (
+      DoDatabaseCommand(@"CREATE TABLE IF NOT EXISTS drinking_water (
               Id INTEGER PRIMARY KEY AUTOINCREMENT,
               Date TEXT,
               Quantity INTEGER
-            )";
+            )");
 
-        tableCmd.ExecuteNonQuery();
+      // using (var connection = new SqliteConnection(connectionString))
+      // {
+      //   connection.Open();
+      //   var tableCmd = connection.CreateCommand();
 
-        connection.Close();
-      }
+      //   tableCmd.CommandText =
+      //     @"CREATE TABLE IF NOT EXISTS drinking_water (
+      //         Id INTEGER PRIMARY KEY AUTOINCREMENT,
+      //         Date TEXT,
+      //         Quantity INTEGER
+      //       )";
+
+      //   tableCmd.ExecuteNonQuery();
+
+      //   connection.Close();
+      // }
+      GetUserInput();
     }
 
     static void GetUserInput()
@@ -59,16 +66,64 @@ namespace habit_tracker
             exit = true;
             break;
           case 1:
-            GetAllRecords();
+            //GetAllRecords();
             break;
           case 2:
             Insert();
             break;
           case 3:
-            Delete();
+            //Delete();
             break;
+            // test
         }
       }
+    }
+
+    private static void DoDatabaseCommand(string command)
+    {
+      using (var connection = new SqliteConnection(connectionString))
+      {
+        connection.Open();
+        var tableCmd = connection.CreateCommand();
+        tableCmd.CommandText = command;
+        tableCmd.ExecuteNonQuery();
+
+        connection.Close();
+      }
+    }
+
+    private static void Insert()
+    {
+      string date = GetDateInput();
+
+      int quantity = GetNumberInput("\n\nPlease inset number of glasses or other measure of your choice.");
+
+      DoDatabaseCommand($"INSERT INTO drinking_water(date, quantity) VALUES('{date}', {quantity})");
+    }
+
+    static string GetDateInput()
+    {
+      Console.WriteLine("Please insert the date in dd/mm/yyyy form.");
+
+      string? input = Console.ReadLine();
+
+      if (input == "0") GetUserInput();
+
+      return input;
+    }
+
+    internal static int GetNumberInput(string message)
+    {
+      Console.WriteLine(message);
+
+      int input;
+
+      while (!int.TryParse(Console.ReadLine(), out input))
+      {
+        Console.WriteLine(message);
+      }
+
+      return input;
     }
   }
 }
